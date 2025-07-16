@@ -12,6 +12,10 @@ lerna-debug.log*
 
 # TypeScript
 *.tsbuildinfo
+out/
+
+# VSCode Extension
+*.vsix
 
 # VSCode
 .vscode/
@@ -37,5 +41,15 @@ logs/
 # macOS
 .DS_Store 
 
-#cursor
+# Cursor specific
 TASKS.md
+.cursor/
+
+# Sensitive configuration files
+.autopilot.json
+test-*.js
+*-test.js
+
+# Temporary files
+*.tmp
+*.temp
