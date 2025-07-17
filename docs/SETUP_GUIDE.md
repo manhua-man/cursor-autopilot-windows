@@ -96,9 +96,7 @@ Create a `.autopilot.json` file in your project root. This file controls the ext
 
 ### 3.4. Cursor Rule
 
-The extension automatically creates the required Cursor rule file at `.cursor/rules/after_each_chat.mdc`. This rule captures chat summaries for the autopilot to process.
-
-**The rule content (automatically created):**
+To enable Cursor Autopilot to capture chat summaries, you must add the following rule to your project's `.cursor/rules/after_each_chat.mdc`(create one!) file:
 
 ```yaml
 ---
@@ -116,7 +114,7 @@ summary: What was done in this chat
 current_status: What's completed and what's left to do
 ```
 
-The rule is set to `alwaysApply: true` to guarantee it's always active.
+Ensure that `alwaysApply: true` is set to guarantee the rule is always active.
 
 ## 4. Usage Flow
 

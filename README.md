@@ -25,8 +25,9 @@ To install Cursor Autopilot directly from the Extensions Marketplace:
 | 1 | Open Cursor. |
 | 2 | Search for Cursor Autopilot in the Extensions Marketplace (Ctrl/CMD-Shift-X). |
 | 3 | Click **Install**. |
-| 4 | Once installed, Cursor Autopilot will automatically create a `.autopilot.json` configuration file and `.cursor/rules/after_each_chat.mdc` rule file in your project root. |
+| 4 | Once installed, Cursor Autopilot will automatically create a `.autopilot.json` configuration file in your project root with default settings. |
 | 5 | Configure your preferred adapter (Telegram, Gmail, or Feishu) in the `.autopilot.json` file. |
+| 6 | Add the new Cursor rule to your project's `.cursor/rules/after_each_chat.mdc`(create one!) file |
 
 > [!NOTE]
 > As a Cursor user, if you try to install from the Visual Studio Marketplace website banner you might find yourself in a state where VSCode has SpecStory installed but Cursor doesn't.
@@ -89,9 +90,7 @@ Simply replace the placeholder values with your actual configuration. The extens
 
 ### Cursor Rule Configuration
 
-The extension automatically creates the required Cursor rule file at `.cursor/rules/after_each_chat.mdc`. This rule captures chat summaries for the autopilot to process.
-
-**The rule content (automatically created):**
+To enable Cursor Autopilot to capture chat summaries, you must add the following rule to your project's `.cursor/rules/after_each_chat.mdc`(create one!) file:
 
 ```yaml
 ---
@@ -109,7 +108,7 @@ summary: What was done in this chat
 current_status: What's completed and what's left to do
 ```
 
-The rule is set to `alwaysApply: true` to guarantee it's always active.
+Ensure that `alwaysApply: true` is set to guarantee the rule is always active.
 
 ## Usage
 

@@ -44,7 +44,6 @@ logs/
 # Cursor specific
 TASKS.md
 .cursor/
-!.cursor/rules/
 
 # Sensitive configuration files
 .autopilot.json
