@@ -47,89 +47,109 @@ const FOCUS_COMMANDS = ['aichat.newfollowupaction'];
 const SUBMIT_COMMANDS = ['composer.submitComposerPrompt', 'aichat.submitFollowupAction', 'composer.sendPrompt', 'cursor.chat.send'];
 const SEND_KEYBIND = 'cursor.sendKeyBinding';
 function activate(ctx) {
-    console.log('[Autopilot] activate');
-    // Register the cursorInject.send command with robust injection logic
-    const cursorInjectDisposable = vscode.commands.registerCommand('cursorInject.send', async (text) => {
-        // If no text provided, prompt user for input
-        if (!text) {
-            text = await vscode.window.showInputBox({
-                prompt: 'Enter text to inject into Cursor Chat',
-                placeHolder: 'Type your message here...'
+    console.log('[Autopilot] Extension activation started');
+    try {
+        // Register the cursorInject.send command with robust injection logic
+        const cursorInjectDisposable = vscode.commands.registerCommand('cursorInject.send', async (text) => {
+            console.log('[cursorInject] Command executed with text:', text);
+            // If no text provided, prompt user for input
+            if (!text) {
+                text = await vscode.window.showInputBox({
+                    prompt: 'Enter text to inject into Cursor Chat',
+                    placeHolder: 'Type your message here...'
+                });
+            }
+            // If user cancelled or provided empty text, return
+            if (!text || text.trim() === '') {
+                console.log('[cursorInject] No text provided, cancelling...');
+                return;
+            }
+            await injectTextToChat(text);
+        });
+        ctx.subscriptions.push(cursorInjectDisposable);
+        console.log('[Autopilot] cursorInject.send command registered successfully');
+        // Register a test command for easier testing
+        const testDisposable = vscode.commands.registerCommand('autopilot.test', async () => {
+            const testMessage = `Test message from Autopilot ${new Date().toLocaleTimeString()} 🚀`;
+            vscode.window.showInformationMessage(`Testing injection: ${testMessage}`);
+            await injectTextToChat(testMessage);
+        });
+        ctx.subscriptions.push(testDisposable);
+        console.log('[Autopilot] autopilot.test command registered successfully');
+        // Load configuration (this will auto-create .autopilot.json if it doesn't exist)
+        const store = (0, store_1.load)();
+        console.log('[Autopilot] Configuration loaded:', JSON.stringify(store, null, 2));
+        const actives = [];
+        // Check if user needs to configure adapters
+        const needsConfiguration = store.adapters.some((name) => {
+            const config = store[name];
+            if (name === 'telegram') {
+                return !config?.token || config.token === 'YOUR_BOT_TOKEN_HERE';
+            }
+            if (name === 'email') {
+                return !config?.user || config.user === 'your-email@gmail.com';
+            }
+            if (name === 'feishu') {
+                return !config?.appId || config.appId === 'cli_xxxxxxxxxxxxxxxxx';
+            }
+            return false;
+        });
+        if (needsConfiguration) {
+            vscode.window.showWarningMessage('Cursor Autopilot: Please configure your adapters in .autopilot.json to start receiving notifications.', 'Open Config').then(selection => {
+                if (selection === 'Open Config') {
+                    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+                    if (workspaceFolder) {
+                        const configPath = workspaceFolder.uri.fsPath + '/.autopilot.json';
+                        vscode.workspace.openTextDocument(configPath).then(doc => {
+                            vscode.window.showTextDocument(doc);
+                        });
+                    }
+                }
             });
         }
-        // If user cancelled or provided empty text, return
-        if (!text || text.trim() === '') {
-            console.log('[cursorInject] No text provided, cancelling...');
-            return;
-        }
-        await injectTextToChat(text);
-    });
-    ctx.subscriptions.push(cursorInjectDisposable);
-    // Register a test command for easier testing
-    const testDisposable = vscode.commands.registerCommand('autopilot.test', async () => {
-        const testMessage = `Test message from Autopilot ${new Date().toLocaleTimeString()} 🚀`;
-        vscode.window.showInformationMessage(`Testing injection: ${testMessage}`);
-        await injectTextToChat(testMessage);
-    });
-    ctx.subscriptions.push(testDisposable);
-    // Load configuration (this will auto-create .autopilot.json if it doesn't exist)
-    const store = (0, store_1.load)();
-    const actives = [];
-    // Check if user needs to configure adapters
-    const needsConfiguration = store.adapters.some((name) => {
-        const config = store[name];
-        if (name === 'telegram') {
-            return !config?.token || config.token === 'YOUR_BOT_TOKEN_HERE';
-        }
-        if (name === 'email') {
-            return !config?.user || config.user === 'your-email@gmail.com';
-        }
-        if (name === 'feishu') {
-            return !config?.appId || config.appId === 'cli_xxxxxxxxxxxxxxxxx';
-        }
-        return false;
-    });
-    if (needsConfiguration) {
-        vscode.window.showWarningMessage('Cursor Autopilot: Please configure your adapters in .autopilot.json to start receiving notifications.', 'Open Config').then(selection => {
-            if (selection === 'Open Config') {
-                const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-                if (workspaceFolder) {
-                    const configPath = workspaceFolder.uri.fsPath + '/.autopilot.json';
-                    vscode.workspace.openTextDocument(configPath).then(doc => {
-                        vscode.window.showTextDocument(doc);
-                    });
-                }
+        store.adapters.forEach((name) => {
+            const factory = adapters_1.adapterMap[name];
+            if (!factory)
+                return vscode.window.showWarningMessage(`Unknown adapter: ${name}`);
+            try {
+                const adapter = factory(store[name] || {});
+                actives.push(adapter);
+                console.log(`[Autopilot] Adapter ${name} initialized successfully`);
+            }
+            catch (err) {
+                console.error(`[Autopilot] Adapter ${name} init failed:`, err);
+                vscode.window.showErrorMessage(`Adapter ${name} init failed: ${err}`);
             }
         });
+        actives.forEach(a => a.onReply(r => {
+            const resp = r.trim() === '1' ? 'Continue ✅' : r.trim() === '2' ? 'Stop ❌' : r;
+            (0, inject_1.sendToChat)(resp);
+        }));
+        (0, dispatcher_1.sub)('summary', s => {
+            if (!(0, store_1.load)().enabled)
+                return;
+            console.log('[Autopilot] Processing summary:', s);
+            actives.forEach(a => a.send(s).catch(e => console.error('[Autopilot] Send failed:', e)));
+        });
+        const w = (0, watcher_1.watch)();
+        if (w) {
+            ctx.subscriptions.push(w);
+            console.log('[Autopilot] File watcher initialized');
+        }
+        else {
+            console.log('[Autopilot] File watcher not initialized - no workspace folder');
+        }
+        // Show status message
+        const statusMessage = needsConfiguration
+            ? `Autopilot ${store.enabled ? 'ON' : 'OFF'} | adapters: ${store.adapters.join(',')} | ⚠️ Configuration needed`
+            : `Autopilot ${store.enabled ? 'ON' : 'OFF'} | adapters: ${store.adapters.join(',')} | ✅ Ready`;
+        vscode.window.showInformationMessage(statusMessage);
+        console.log('[Autopilot] Extension activation completed successfully');
     }
-    store.adapters.forEach((name) => {
-        const factory = adapters_1.adapterMap[name];
-        if (!factory)
-            return vscode.window.showWarningMessage(`Unknown adapter: ${name}`);
-        try {
-            actives.push(factory(store[name] || {}));
-        }
-        catch (err) {
-            vscode.window.showErrorMessage(`Adapter ${name} init failed: ${err}`);
-        }
-    });
-    actives.forEach(a => a.onReply(r => {
-        const resp = r.trim() === '1' ? 'Continue ✅' : r.trim() === '2' ? 'Stop ❌' : r;
-        (0, inject_1.sendToChat)(resp);
-    }));
-    (0, dispatcher_1.sub)('summary', s => {
-        if (!(0, store_1.load)().enabled)
-            return;
-        actives.forEach(a => a.send(s).catch(e => console.error('[Autopilot]', e)));
-    });
-    const w = (0, watcher_1.watch)();
-    if (w)
-        ctx.subscriptions.push(w);
-    // Show status message
-    const statusMessage = needsConfiguration
-        ? `Autopilot ${store.enabled ? 'ON' : 'OFF'} | adapters: ${store.adapters.join(',')} | ⚠️ Configuration needed`
-        : `Autopilot ${store.enabled ? 'ON' : 'OFF'} | adapters: ${store.adapters.join(',')} | ✅ Ready`;
-    vscode.window.showInformationMessage(statusMessage);
+    catch (error) {
+        console.error('[Autopilot] Extension activation failed:', error);
+        vscode.window.showErrorMessage(`Cursor Autopilot activation failed: ${error}`);
+    }
 }
 async function injectTextToChat(text) {
     console.log('[cursorInject] Injecting text:', text);

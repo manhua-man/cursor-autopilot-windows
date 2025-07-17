@@ -76,7 +76,7 @@ export default function Email(cfg: any): Adapter {
           from: cfg.user,
           to:   cfg.to,
           subject: '[Cursor] Summary',
-          text: `${s.summary}\nCurrent Status: ${s.current_status}\n\nReply 1=continue`
+          text: `${s.summary}\nCurrent Status\n${s.current_status}\n\nReply 1=continue or type any instruction to continue building`
         });
         
         console.log('[EmailAdapter] Email sent successfully, messageId:', result.messageId);

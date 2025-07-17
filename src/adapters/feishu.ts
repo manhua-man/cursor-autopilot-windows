@@ -210,7 +210,7 @@ export default function Feishu(cfg: FeishuConfig): Adapter {
               {
                 tag: 'div',
                 text: {
-                  content: `➡️ **项目进度**: ${s.current_status}`,
+                  content: `➡️ **项目进度**\n${s.current_status}`,
                   tag: 'lark_md',
                 },
               },

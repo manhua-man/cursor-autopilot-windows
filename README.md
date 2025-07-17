@@ -25,9 +25,9 @@ To install Cursor Autopilot directly from the Extensions Marketplace:
 | 1 | Open Cursor. |
 | 2 | Search for Cursor Autopilot in the Extensions Marketplace (Ctrl/CMD-Shift-X). |
 | 3 | Click **Install**. |
-| 4 | Once installed, Cursor Autopilot will automatically create a `.autopilot.json` configuration file in your project root with default settings. |
-| 5 | Configure your preferred adapter (Telegram, Gmail, or Feishu) in the `.autopilot.json` file. |
-| 6 | Add the new Cursor rule to your project's `.cursor/rules/after_each_chat.mdc`(create one!) file |
+| 4 | Open any project folder in Cursor. |
+| 5 | Cursor Autopilot will automatically check and create the required files: `.autopilot.json` and `.cursor/rules/after_each_chat.mdc`. |
+| 6 | Configure your preferred adapter (Telegram, Email, or Feishu) in the `.autopilot.json` file. |
 
 > [!NOTE]
 > As a Cursor user, if you try to install from the Visual Studio Marketplace website banner you might find yourself in a state where VSCode has SpecStory installed but Cursor doesn't.
@@ -55,7 +55,12 @@ Alternatively, if you cannot find in Extension Marketplace, you can manually ins
 
 ## Configuration
 
-The extension automatically creates a `.autopilot.json` file in your project root when first activated. This file contains default configuration templates for all supported adapters.
+The extension automatically checks and creates the required files whenever you open a workspace:
+
+1. **`.autopilot.json`** - Configuration file with adapter settings
+2. **`.cursor/rules/after_each_chat.mdc`** - Cursor rule for capturing chat summaries
+
+If files are missing or have incorrect content, they will be automatically created/updated.
 
 **Example `.autopilot.json` structure:**
 
@@ -90,7 +95,9 @@ Simply replace the placeholder values with your actual configuration. The extens
 
 ### Cursor Rule Configuration
 
-To enable Cursor Autopilot to capture chat summaries, you must add the following rule to your project's `.cursor/rules/after_each_chat.mdc`(create one!) file:
+The extension automatically manages the Cursor rule file at `.cursor/rules/after_each_chat.mdc`. This file is checked and updated every time you open a workspace to ensure it has the correct content.
+
+**The rule content (automatically managed):**
 
 ```yaml
 ---
@@ -116,7 +123,6 @@ Ensure that `alwaysApply: true` is set to guarantee the rule is always active.
 2.  **Receive Notification**: Get a summary of the AI's progress on your configured external channel.
 3.  **Reply with Instructions**:
     *   `1` = Continue AI work.
-    *   `2` = Stop the current task.
     *   Any other text = Send custom instructions directly to the AI.
 4.  **AI Continues**: The AI in Cursor will respond based on your input.
 

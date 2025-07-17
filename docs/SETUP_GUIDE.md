@@ -124,7 +124,6 @@ Ensure that `alwaysApply: true` is set to guarantee the rule is always active.
 2.  **Receive Notification**: After the chat, you'll get a summary notification on your configured adapter (e.g., Telegram, Feishu).
 3.  **Reply with Instructions**:
     -   `1` = Continue AI work.
-    -   `2` = Stop the current task.
     -   Any other text = Send custom instructions to the AI.
 4.  **AI Continues**: The AI will act based on your reply.
 
