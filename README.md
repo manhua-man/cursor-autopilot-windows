@@ -4,7 +4,9 @@
 <p align="center">Remote control your Cursor AI coding sessions via Telegram, Gmail, and Feishu.</p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.0.5-purple" alt="Version">
+  <a href="https://marketplace.visualstudio.com/items?itemName=heyzgj.cursor-autopilot">
+    <img src="https://img.shields.io/visual-studio-marketplace/v/heyzgj.cursor-autopilot?label=VS%20Code&color=blue&logo=visual-studio-code&logoColor=white" alt="VS Code Marketplace Version">
+  </a>
   <a href="https://open-vsx.org/extension/heyzgj/cursor-autopilot">
     <img src="https://img.shields.io/static/v1?label=Open%20VSX&message=Cursor%20Autopilot&color=blue&style=flat-square&logo=visual-studio-code&logoColor=white" alt="Open VSX">
   </a>
