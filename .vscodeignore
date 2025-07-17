@@ -9,3 +9,23 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+
+# Additional exclusions to reduce package size
+node_modules/**
+docs/**
+install.sh
+sample.md
+CHANGELOG.md
+cursor_rule_sample.md
+.autopilot.json.example
+.cursorrules
+.npmrc
+*.vsix
+*.log
+.DS_Store
+test/**
+tests/**
+**/*.test.js
+**/*.test.ts
+coverage/**
+.nyc_output/**
