@@ -4,7 +4,7 @@
   "icon": "autopilot_logo.png",
   "displayName": "Cursor Autopilot",
   "description": "Cursor chat through Telegram/Feishu/Email for remote collaboration",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "engines": {
     "vscode": "^1.99.0"
   },
@@ -29,7 +29,9 @@
     "coding"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onCommand:cursorInject.send",
+    "onDidChangeWorkspaceFolders"
   ],
   "main": "./out/extension.js",
   "contributes": {
