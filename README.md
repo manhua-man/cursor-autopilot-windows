@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="./.assets/demo_gif.gif" alt="Cursor Autopilot demo" />
+  <img src="./.assets/demo_gif.gif" width="880" alt="Cursor Autopilot demo" />
 </p>
 
 ## Overview
@@ -102,43 +102,6 @@ Simply replace the placeholder values with your actual configuration. The extens
 ### Cursor Rule Configuration
 
 The extension automatically manages the Cursor rule file at `.cursor/rules/after_each_chat.mdc`. This file is checked and updated every time you open a workspace to ensure it has the correct content.
-
-**The rule content (automatically managed):**
-
-```yaml
----
-description: Always write a chat-end JSON summary to ./tmp
-alwaysApply: true
----
-
-# 📝 Chat-End Summary Rule
-
-At the **end of every chat turn**, do the following without exception:
-
-1. **Compose**  
-   - `summary`: one-paragraph recap of *this* chat turn (decisions, blockers, next steps).  
-   - `current_status`: a brief snapshot of overall project progress.
-
-2. **Persist**  
-   If the `tmp` directory does not exist, create it:
-   ```bash
-   mkdir -p tmp
-    ```
-
-3. **Write** the JSON file using Cursor’s file-creation syntax:
-
-   ```json: tmp/summary-${{date:YYYYMMDD-HHmmss}}.json
-   {
-     "summary": "<insert summary here>",
-     "current_status": "<insert current status here>"
-   }
-   ```
-
-4. **Silence**
-
-   * Do **not** ask for confirmation.
-   * Do **not** print extra explanation—just run the commands & write the file.
-```
 
 Ensure that `alwaysApply: true` is set to guarantee the rule is always active.
 
