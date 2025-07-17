@@ -1,7 +1,16 @@
 <p align="center">
   <img src="./autopilot.png" alt="Cursor Autopilot Logo">
 </p>
-<p align="center">Remote control your Cursor AI coding sessions via Telegram, Email, and Feishu.</p>
+<p align="center">Remote control your Cursor AI coding sessions via Telegram, Gmail, and Feishu.</p>
+
+<p align="center">
+  <a href="https://open-vsx.org/extension/heyzgj/cursor-autopilot">
+    <img src="https://img.shields.io/badge/dynamic/json.svg?url=https://open-vsx.org/vscode/gallery/heyzgj/cursor-autopilot/latest?label=version&color=blue&query=$.version" alt="Version">
+  </a>
+  <a href="https://open-vsx.org/extension/heyzgj/cursor-autopilot">
+    <img src="https://img.shields.io/static/v1?label=Open%20VSX&message=Cursor%20Autopilot&color=blue&style=flat-square&logo=visual-studio-code&logoColor=white" alt="Open VSX">
+  </a>
+</p>
 
 ## Overview
 
@@ -19,7 +28,8 @@ To install Cursor Autopilot directly from the Extensions Marketplace:
 | 2 | Search for Cursor Autopilot in the Extensions Marketplace (Ctrl/CMD-Shift-X). |
 | 3 | Click **Install**. |
 | 4 | Once installed, Cursor Autopilot will automatically create a `.autopilot.json` configuration file in your project root with default settings. |
-| 5 | Configure your preferred adapter (Telegram, Email, or Feishu) in the `.autopilot.json` file. |
+| 5 | Configure your preferred adapter (Telegram, Gmail, or Feishu) in the `.autopilot.json` file. |
+| 6 | Add the new Cursor rule to your project's `.cursor/rules/after_each_chat.mdc`(create one!) file |
 
 > [!NOTE]
 > As a Cursor user, if you try to install from the Visual Studio Marketplace website banner you might find yourself in a state where VSCode has SpecStory installed but Cursor doesn't.
@@ -79,6 +89,28 @@ The extension automatically creates a `.autopilot.json` file in your project roo
 ```
 
 Simply replace the placeholder values with your actual configuration. The extension will show a warning message if configuration is needed.
+
+### Cursor Rule Configuration
+
+To enable Cursor Autopilot to capture chat summaries, you must add the following rule to your project's `.cursor/rules/after_each_chat.mdc`(create one!) file:
+
+```yaml
+---
+alwaysApply: true
+---
+
+At the end of each chat, save a JSON file with:
+
+Path: ./tmp/summary-${{date:YYYYMMDD-HHmmss}}.json
+
+Fields:
+
+summary: What was done in this chat
+
+current_status: What's completed and what's left to do
+```
+
+Ensure that `alwaysApply: true` is set to guarantee the rule is always active.
 
 ## Usage
 

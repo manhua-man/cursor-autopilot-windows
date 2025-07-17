@@ -5,7 +5,7 @@ export default function Telegram(cfg:any): Adapter {
   let replyHandler:(r:string)=>void = ()=>{};
   bot.on('message', (m: any)=>{ if(m.chat.id.toString()===cfg.chatId) replyHandler(m.text||''); });
   return {
-    send: async (s)=> { await bot.sendMessage(cfg.chatId, `📝 *Summary*\n${s.summary}\n\n➡️ *Next*: ${s.next_steps}\n\nReply 1=continue 2=stop`, { parse_mode:'Markdown' }); },
+    send: async (s)=> { await bot.sendMessage(cfg.chatId, `📝 *Summary*\n${s.summary}\n\n➡️ *Current Status*: ${s.current_status}\n\nReply 1=continue`, { parse_mode:'Markdown' }); },
     onReply: (h)=> replyHandler = h,
     dispose: ()=> bot.stopPolling()
   };

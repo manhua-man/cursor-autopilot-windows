@@ -210,7 +210,14 @@ export default function Feishu(cfg: FeishuConfig): Adapter {
               {
                 tag: 'div',
                 text: {
-                  content: '\n回复：1=继续 或者回复任何指令',
+                  content: `➡️ **项目进度**: ${s.current_status}`,
+                  tag: 'lark_md',
+                },
+              },
+              {
+                tag: 'div',
+                text: {
+                  content: '\n回复：1=继续 或者回复任何指令 ',
                   tag: 'plain_text',
                 },
               },

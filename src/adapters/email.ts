@@ -1,11 +1,10 @@
-//  ⬇️  覆盖 src/adapters/email.ts  完整文件
 import nodemailer from 'nodemailer';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import { Adapter } from '.';
 
 export default function Email(cfg: any): Adapter {
   /* ---------- resolve runtime cfg ---------- */
-  const port   = Number(cfg.port) || 587;          // Gmail 推荐 587 STARTTLS
+  const port   = Number(cfg.port) || 587;          // Gmail recommend 587 STARTTLS
   const secure = cfg.secure ?? false;              // false = plain → STARTTLS
   const agent  = cfg.proxy ? new SocksProxyAgent(cfg.proxy) : undefined;
 
@@ -68,7 +67,7 @@ export default function Email(cfg: any): Adapter {
   let replyHandler: (r: string) => void = () => {};
 
   return {
-    /** send() 必须返回 void → async + await */
+    /** send() returns void → async + await */
     async send(s) {
       try {
         console.log('[EmailAdapter] Attempting to send email...');
@@ -77,7 +76,7 @@ export default function Email(cfg: any): Adapter {
           from: cfg.user,
           to:   cfg.to,
           subject: '[Cursor] Summary',
-          text: `${s.summary}\nNext: ${s.next_steps}\n\nReply 1=continue 2=stop`
+          text: `${s.summary}\nCurrent Status: ${s.current_status}\n\nReply 1=continue`
         });
         
         console.log('[EmailAdapter] Email sent successfully, messageId:', result.messageId);
@@ -97,6 +96,6 @@ export default function Email(cfg: any): Adapter {
         console.error('[EmailAdapter] Email sending failed, but continuing...');
       }
     },
-    onReply: h => replyHandler = h            // TODO: 轮询 IMAP
+    onReply: h => replyHandler = h            // TODO: Poll IMAP
   };
 }
