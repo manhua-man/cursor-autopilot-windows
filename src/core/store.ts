@@ -44,18 +44,39 @@ const defaultConfig = {
 };
 
 const cursorRuleContent = `---
+description: Always write a chat-end JSON summary to ./tmp
 alwaysApply: true
 ---
 
-At the end of each chat, save a JSON file with:
+# 📝 Chat-End Summary Rule
 
-Path: ./tmp/summary-\${{date:YYYYMMDD-HHmmss}}.json
+At the **end of every chat turn**, do the following without exception:
 
-Fields:
+1. **Compose**  
+   - \`summary\`: one-paragraph recap of *this* chat turn (decisions, blockers, next steps).  
+   - \`current_status\`: a brief snapshot of overall project progress.
 
-summary: What was done in this chat
+2. **Persist**  
+   If the \`tmp\` directory does not exist, create it:
+   \`\`\`bash
+   mkdir -p tmp
+   \`\`\`
 
-current_status: What's completed and what's left to do`;
+3. **Write** the JSON file using Cursor’s file-creation syntax:
+
+   \`\`\`json: tmp/summary-\${{date:YYYYMMDD-HHmmss}}.json
+   {
+     "summary": "<insert summary here>",
+     "current_status": "<insert current status here>"
+   }
+   \`\`\`
+
+4. **Silence**
+
+   * Do **not** ask for confirmation.
+   * Do **not** print extra explanation—just run the commands & write the file.
+`;
+
 
 const ensureConfigFile = () => {
   try {
