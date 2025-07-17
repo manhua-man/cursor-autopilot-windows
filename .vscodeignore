@@ -11,6 +11,7 @@ vsc-extension-quickstart.md
 **/.vscode-test.*
 
 # Additional exclusions to reduce package size
+node_modules/**
 docs/**
 install.sh
 sample.md
@@ -28,6 +29,3 @@ tests/**
 **/*.test.ts
 coverage/**
 .nyc_output/**
-
-# restore node_modules
-!node_modules/**
