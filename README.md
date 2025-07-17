@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="./.assets/demo_gif.gif" width="880" alt="Cursor Autopilot demo" />
+  <img src="./.assets/demo_gif.gif" width="720" alt="Cursor Autopilot demo" />
 </p>
 
 ## Overview
