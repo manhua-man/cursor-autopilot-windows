@@ -1,10 +1,10 @@
 {
   "name": "cursor-autopilot",
   "publisher": "heyzgj",
-  "icon": "autopilot_logo.png",
+  "icon": "autopilot_icon.jpg",
   "displayName": "Cursor Autopilot",
   "description": "Cursor chat through Telegram/Feishu/Email for remote collaboration",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "engines": {
     "vscode": "^1.99.0"
   },

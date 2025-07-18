@@ -9,6 +9,7 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+.assets/**
 
 # Additional exclusions to reduce package size
 docs/**
@@ -16,9 +17,10 @@ install.sh
 sample.md
 CHANGELOG.md
 .autopilot.json.example
-.cursorrules
+.cursor/**
 .npmrc
 *.vsix
+.autopilot.json
 *.log
 .DS_Store
 test/**
