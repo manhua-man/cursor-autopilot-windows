@@ -12,6 +12,24 @@ const FOCUS_COMMANDS  = ['aichat.newfollowupaction'];
 const SUBMIT_COMMANDS = ['composer.submitComposerPrompt','aichat.submitFollowupAction','composer.sendPrompt','cursor.chat.send'];
 const SEND_KEYBIND    = 'cursor.sendKeyBinding';
 
+// Style presets for quick switching
+const STYLE_PRESETS: Record<string, string> = {
+  default: '',
+  concise: 'Please respond concisely using tight bullet points and minimal prose.',
+  detailed: 'Provide thorough step-by-step reasoning and include code examples when helpful.',
+  zh: '请使用简体中文回答，并保持专业、清晰、简洁。',
+  reviewer: 'Act as a strict senior code reviewer: focus on correctness, safety, naming, testability, and clear remedial steps.',
+  tests: 'Write tests first. Propose test cases, then implement only the code needed to pass them.',
+};
+
+let currentStyleKey: keyof typeof STYLE_PRESETS = 'default';
+
+function applyStyle(text: string): string {
+  const style = STYLE_PRESETS[currentStyleKey] || '';
+  if (!style) return text;
+  return `${style}\n\n${text}`;
+}
+
 export function activate(ctx: vscode.ExtensionContext) {
   console.log('[Autopilot] Extension activation started');
   
@@ -34,7 +52,7 @@ export function activate(ctx: vscode.ExtensionContext) {
         return;
       }
       
-      await injectTextToChat(text);
+      await injectTextToChat(applyStyle(text));
     });
     ctx.subscriptions.push(cursorInjectDisposable);
     console.log('[Autopilot] cursorInject.send command registered successfully');
@@ -100,9 +118,54 @@ export function activate(ctx: vscode.ExtensionContext) {
       }
     });
 
-    actives.forEach(a => a.onReply(r => {
-      const resp = r.trim()==='1' ? 'Continue ✅' : r.trim()==='2' ? 'Stop ❌' : r;
-      sendToChat(resp);
+    actives.forEach(a => a.onReply(async (raw) => {
+      const r = (raw || '').trim();
+
+      // numeric quick actions
+      if (r === '1') {
+        await sendToChat(applyStyle('Continue ✅'));
+        return;
+      }
+      if (r === '2') {
+        await sendToChat('Stop ❌');
+        return;
+      }
+
+      // slash commands
+      if (r.startsWith('/')) {
+        const [cmd, ...args] = r.slice(1).split(/\s+/);
+        switch (cmd.toLowerCase()) {
+          case 'style':
+          case 'tone': {
+            const key = (args[0] || '').toLowerCase();
+            if (!key) {
+              const keys = Object.keys(STYLE_PRESETS).join(', ');
+              vscode.window.showInformationMessage(`Current style: ${currentStyleKey}. Available: ${keys}`);
+            } else if (key in STYLE_PRESETS) {
+              currentStyleKey = key as keyof typeof STYLE_PRESETS;
+              vscode.window.showInformationMessage(`Style switched to: ${currentStyleKey}`);
+            } else if (key === 'reset' || key === 'default') {
+              currentStyleKey = 'default';
+              vscode.window.showInformationMessage('Style reset to default');
+            } else {
+              vscode.window.showWarningMessage(`Unknown style: ${key}`);
+            }
+            return;
+          }
+          case 'styles': {
+            const keys = Object.keys(STYLE_PRESETS).join(', ');
+            vscode.window.showInformationMessage(`Available styles: ${keys}. Use /style <name> to switch.`);
+            return;
+          }
+          default: {
+            vscode.window.showWarningMessage(`Unknown command: /${cmd}`);
+            return;
+          }
+        }
+      }
+
+      // default: send as chat with current style applied
+      await sendToChat(applyStyle(r));
     }));
 
     sub('summary', s => {

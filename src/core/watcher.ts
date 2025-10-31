@@ -7,72 +7,60 @@ export function watch() {
   const root = vscode.workspace.workspaceFolders?.[0];
   if (!root) return;
 
-  // watch "./tmp/summary-*.json"
-  const tmpDir = path.join(root.uri.fsPath, 'tmp');
-  const pattern = new vscode.RelativePattern(tmpDir, 'summary-*.json');
+  // Watch fixed file: ".cursor/CHAT_SUMMARY"
+  const cursorDir = path.join(root.uri.fsPath, '.cursor');
+  const pattern = new vscode.RelativePattern(cursorDir, 'CHAT_SUMMARY');
   const watcher = vscode.workspace.createFileSystemWatcher(pattern);
 
   const safeRead = (u: vscode.Uri) => {
     try { 
-      const content = fs.readFileSync(u.fsPath, 'utf8');
-      console.log(`[Autopilot] Reading file: ${u.fsPath}, content: ${content}`);
-      
-      const parsed = JSON.parse(content);
-      
-      // 验证必要字段
-      if (!parsed.summary && !parsed.current_status) {
-        console.error(`[Autopilot] Invalid JSON structure in ${u.fsPath}: missing summary or current_status`);
-        return null;
-      }
-      
-      return parsed;
+      // Add small delay to ensure file write is complete
+      setTimeout(() => {
+        if (!fs.existsSync(u.fsPath)) {
+          console.log(`[Autopilot] File not found: ${u.fsPath}`);
+          return;
+        }
+        
+        const content = fs.readFileSync(u.fsPath, 'utf8').trim();
+        if (!content) {
+          console.log(`[Autopilot] Empty file: ${u.fsPath}`);
+          return;
+        }
+        
+        console.log(`[Autopilot] Reading file: ${u.fsPath}`);
+        
+        const parsed = JSON.parse(content);
+        
+        // Validate required fields
+        if (!parsed.summary && !parsed.current_status) {
+          console.error(`[Autopilot] Invalid JSON structure: missing summary or current_status`);
+          return;
+        }
+        
+        pub('summary', parsed);
+        console.log('[Autopilot] Published summary to adapters');
+      }, 100);
     } catch (error) {
       console.error(`[Autopilot] Error reading/parsing file ${u.fsPath}:`, error);
-      return null;
     }
   };
 
-  // Track processed files to avoid duplicates
-  const processedFiles = new Set<string>();
-  
-  // Get existing files and mark them as processed (don't send them)
-  try {
-    if (fs.existsSync(tmpDir)) {
-      const existingFiles = fs.readdirSync(tmpDir)
-        .filter(file => file.startsWith('summary-') && file.endsWith('.json'))
-        .map(file => path.join(tmpDir, file));
-      
-      existingFiles.forEach(filePath => {
-        processedFiles.add(filePath);
-      });
-      
-      console.log(`[Autopilot] Marked ${existingFiles.length} existing summary files as processed`);
-    }
-  } catch (error) {
-    console.error('[Autopilot] Error reading existing files:', error);
+  // Create .cursor directory if not exists
+  if (!fs.existsSync(cursorDir)) {
+    fs.mkdirSync(cursorDir, { recursive: true });
+    console.log(`[Autopilot] Created directory: ${cursorDir}`);
   }
 
   watcher.onDidCreate(u => { 
-    if (!processedFiles.has(u.fsPath)) {
-      const d = safeRead(u); 
-      if (d) {
-        processedFiles.add(u.fsPath);
-        pub('summary', d);
-        console.log('[Autopilot] Processing new summary file:', u.fsPath);
-      }
-    }
+    console.log('[Autopilot] CHAT_SUMMARY created');
+    safeRead(u);
   });
   
   watcher.onDidChange(u => { 
-    if (!processedFiles.has(u.fsPath)) {
-      const d = safeRead(u); 
-      if (d) {
-        processedFiles.add(u.fsPath);
-        pub('summary', d);
-        console.log('[Autopilot] Processing changed summary file:', u.fsPath);
-      }
-    }
+    console.log('[Autopilot] CHAT_SUMMARY changed');
+    safeRead(u);
   });
 
+  console.log(`[Autopilot] Watching: ${path.join(cursorDir, 'CHAT_SUMMARY')}`);
   return watcher;
 }
