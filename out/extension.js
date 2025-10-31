@@ -42,6 +42,7 @@ const dispatcher_1 = require("./core/dispatcher");
 const watcher_1 = require("./core/watcher");
 const adapters_1 = require("./adapters");
 const inject_1 = require("./core/inject");
+const nut_js_1 = require("@nut-tree-fork/nut-js");
 const OPEN_COMMANDS = ['composer.startComposerPrompt'];
 const FOCUS_COMMANDS = ['aichat.newfollowupaction'];
 const SUBMIT_COMMANDS = ['composer.submitComposerPrompt', 'aichat.submitFollowupAction', 'composer.sendPrompt', 'cursor.chat.send'];
@@ -228,6 +229,21 @@ async function osLevelSend() {
         await delay(200);
         await execPromise(`xdotool key ctrl+Return`);
         console.log('[cursorInject] Sent Ctrl+Enter via xdotool');
+    }
+    else if (process.platform === 'win32') {
+        // Windows: use nut-js for keyboard automation
+        try {
+            console.log('[cursorInject] Windows platform detected, using nut-js...');
+            await delay(200); // Small delay for stability
+            await nut_js_1.keyboard.type(nut_js_1.Key.LeftControl, nut_js_1.Key.Enter);
+            console.log('[cursorInject] Sent Ctrl+Enter via nut-js');
+        }
+        catch (err) {
+            console.error('[cursorInject] Windows auto-send failed:', err);
+            const errorMsg = `Windows自动发送失败: ${err}。请手动按 Ctrl+Enter 发送消息。`;
+            vscode.window.showWarningMessage(errorMsg);
+            console.log('[cursorInject] Showing manual operation prompt to user');
+        }
     }
     else {
         vscode.window.showWarningMessage('OS‑level fallback not implemented for this platform. Please press Enter manually.');
